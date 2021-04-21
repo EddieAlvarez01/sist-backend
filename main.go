@@ -2,6 +2,10 @@ package main
 
 import (
 	"fmt"
+	"github.com/EddieAlvarez01/sist-backend/handlers"
+	"github.com/EddieAlvarez01/sist-backend/models"
+	"github.com/EddieAlvarez01/sist-backend/routes"
+	"github.com/EddieAlvarez01/sist-backend/storage"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
@@ -18,6 +22,13 @@ func main() {
 		log.Fatal("Error starting the .env file: ", err)
 	}
 
+	//Database
+	sistStorage, err := storage.NewSistStorage()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer sistStorage.Session.Close()
+
 	//Server
 	app := fiber.New()
 
@@ -26,9 +37,9 @@ func main() {
 	app.Use(recover.New())
 
 	//Routes
-	app.Get("/api/v1", func(c *fiber.Ctx) error {
-		return c.SendString("Hello world")
-	})
+	group := app.Group("/api/v1")
+	handlersRoutes := routes.HandlersRoutes{AccountHolderService: &handlers.AccountHolderService{AccountHolderModel: &models.ManageAccountHolder{SistStorage: sistStorage}}}
+	handlersRoutes.RoutesUp(group)
 
 	//Run server
 	log.Fatal(app.Listen(fmt.Sprintf(":%s", os.Getenv("PORT"))))
