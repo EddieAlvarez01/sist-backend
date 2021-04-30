@@ -13,4 +13,5 @@ func (h *HandlersRoutes) RoutesUp(app fiber.Router) {
 	//Routes Account Holder
 	routesAccount := app.Group("/account_holder")
 	routesAccount.Post("/", h.RegisterNewUser)
+	routesAccount.Post("/login", h.LoginUser)
 }
