@@ -38,7 +38,11 @@ func main() {
 
 	//Routes
 	group := app.Group("/api/v1")
-	handlersRoutes := routes.HandlersRoutes{AccountHolderService: &handlers.AccountHolderService{AccountHolderModel: &models.ManageAccountHolder{SistStorage: sistStorage}}}
+	handlersRoutes := routes.HandlersRoutes{
+		AccountHolderService: &handlers.AccountHolderService{AccountHolderModel: &models.ManageAccountHolder{SistStorage: sistStorage}},
+		InstitutionService: &handlers.InstitutionService{InstitutionModel: &models.ManageInstitution{SistStorage: sistStorage}},
+		AccountService: &handlers.AccountService{AccountModel: &models.ManageAccount{SistStorage: sistStorage}},
+	}
 	handlersRoutes.RoutesUp(group)
 
 	//Run server

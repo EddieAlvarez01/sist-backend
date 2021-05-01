@@ -61,3 +61,20 @@ func (m *ManageAccountHolder) GetUserByEmailAndPassword(email, password string)(
 	}
 	return &accountHolder, nil
 }
+
+//Get all accounts holder
+func (m *ManageAccountHolder) GetAll() ([]AccountHolder, error) {
+	scanner := m.Session.Query(`SELECT id, nombre, apellido, correo, rol
+								FROM cuentahabiente_por_ID`).WithContext(context.TODO()).Iter().Scanner()
+	accountsHolder := make([]AccountHolder, 0)
+	for scanner.Next() {
+		var accountHolder AccountHolder
+		err := scanner.Scan(&accountHolder.ID, &accountHolder.Name, &accountHolder.LastName, &accountHolder.Email, &accountHolder.Role)
+		if err != nil {
+			log.Println(err.Error())
+			return nil, err
+		}
+		accountsHolder = append(accountsHolder, accountHolder)
+	}
+	return accountsHolder, nil
+}
