@@ -9,6 +9,7 @@ type HandlersRoutes struct {
 	*handlers.AccountHolderService
 	*handlers.InstitutionService
 	*handlers.AccountService
+	*handlers.OperationService
 }
 
 func (h *HandlersRoutes) RoutesUp(app fiber.Router) {
@@ -25,5 +26,10 @@ func (h *HandlersRoutes) RoutesUp(app fiber.Router) {
 
 	//Routes account
 	routesAccount2 := app.Group("/account")
+	routesAccount2.Post("/", h.CreateNewAccount)
 	routesAccount2.Get("/account_holder/:id", h.GetAllAccountsHolderAccounts)
+
+	//Routes operations
+	routesOperation := app.Group("/operations")
+	routesOperation.Post("/", h.CreateOperation)
 }

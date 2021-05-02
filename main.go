@@ -42,6 +42,7 @@ func main() {
 		AccountHolderService: &handlers.AccountHolderService{AccountHolderModel: &models.ManageAccountHolder{SistStorage: sistStorage}},
 		InstitutionService: &handlers.InstitutionService{InstitutionModel: &models.ManageInstitution{SistStorage: sistStorage}},
 		AccountService: &handlers.AccountService{AccountModel: &models.ManageAccount{SistStorage: sistStorage}},
+		OperationService: &handlers.OperationService{OperationModel: &models.ManageOperation{SistStorage: sistStorage}},
 	}
 	handlersRoutes.RoutesUp(group)
 
