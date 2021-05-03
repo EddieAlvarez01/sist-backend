@@ -21,3 +21,33 @@ func (o *OperationService) CreateOperation(c *fiber.Ctx) error {
 	}
 	return c.Status(fiber.StatusCreated).JSON(account)
 }
+
+//Get all operations by account holder id
+func (o *OperationService) GetAllOperationsByAccountHolderID(c *fiber.Ctx) error {
+	id := c.Params("id")
+	operations, err := o.OperationModel.GetAllByAccountHolderID(id,"",1)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(models.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+	return c.Status(fiber.StatusOK).JSON(operations)
+}
+
+func (o *OperationService) GetAllOperationsByAccountHolderIDAndMonth(c *fiber.Ctx) error {
+	id := c.Params("id")
+	month := c.Params("month")
+	operations, err := o.OperationModel.GetAllByAccountHolderID(id, month, 0)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(models.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+	return c.Status(fiber.StatusOK).JSON(operations)
+}
+
+//Get total by institution ID
+func (o *OperationService) GetTotalsByInstitutionID(c *fiber.Ctx) error {
+	id := c.Params("id")
+	total, err := o.OperationModel.GetInstitutionTotals(id)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(models.Error{Code: fiber.StatusInternalServerError, Message: err.Error()})
+	}
+	return c.Status(fiber.StatusOK).JSON(total)
+}

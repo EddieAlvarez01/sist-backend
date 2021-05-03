@@ -24,6 +24,7 @@ type ManageOperation struct {
 
 type Operation struct {
 	AccountHolderID string `json:"account_holder_id,omitempty"`
+	Month string `json:"month,omitempty"`
 	AccountNumber string `json:"account_number,omitempty"`
 	OperationID string `json:"operation_id,omitempty"`
 	Type string `json:"type,omitempty"`
@@ -42,10 +43,10 @@ type DTOOperation struct {
 }
 
 type TotalInstitution struct {
-	InstitutionID string
-	InstitutionName string
-	Debits string
-	Credits string
+	InstitutionID string `json:"institution_id"`
+	InstitutionName string `json:"institution_name"`
+	Debits string `json:"debits"`
+	Credits string `json:"credits"`
 }
 
 //Create new operation
@@ -247,6 +248,56 @@ func (m *ManageOperation) ConvertCurrencyToStringFloat(value int) string {
 	}
 	values := []string{numberString[:len(numberString) - 2], numberString[len(numberString) - 2:]}
 	return strings.Join(values, ".")
+}
+
+//Get all operations by account holder ID
+func (m *ManageOperation) GetAllByAccountHolderID(id string, month string, op int) ([]Operation, error) {
+	operations := make([]Operation, 0)
+	var query *gocql.Query
+	if op == 1 {
+		query = m.Session.Query(`SELECT cuentahabiente, no_cuenta, operacionID, tipo, descripcion, valor, fecha, estado, razon_falla
+								FROM operaciones_por_cuentahabiente
+								WHERE cuentahabiente = ?`, id).WithContext(context.TODO())
+	}else{
+		query = m.Session.Query(`SELECT cuentahabiente, mes, no_cuenta, operacionID, tipo, descripcion, valor, fecha, estado, razon_falla
+								FROM operaciones_por_cuentahabiente_por_mes
+								WHERE cuentahabiente = ? AND mes = ?`, id, month).WithContext(context.TODO())
+	}
+	scanner := query.Iter().Scanner()
+	for scanner.Next() {
+		var operation Operation
+		var valueDec inf.Dec
+		var err error
+		if op == 1 {
+			err = scanner.Scan(&operation.AccountHolderID, &operation.AccountNumber, &operation.OperationID, &operation.Type, &operation.Description, &valueDec, &operation.Date, &operation.State, &operation.ReasonFailure)
+		}else{
+			err = scanner.Scan(&operation.AccountHolderID, &operation.Month, &operation.AccountNumber, &operation.OperationID, &operation.Type, &operation.Description, &valueDec, &operation.Date, &operation.State, &operation.ReasonFailure)
+		}
+		if  err != nil {
+			log.Println(err.Error())
+			return nil, err
+		}
+		operation.Value = valueDec.String()
+		operations = append(operations, operation)
+	}
+	return operations, nil
+}
+
+//Get institution totals
+func (m *ManageOperation) GetInstitutionTotals(id string) (*TotalInstitution, error) {
+	var total TotalInstitution
+	var debitsDec inf.Dec
+	var creditsDec inf.Dec
+	err := m.Session.Query(`SELECT institucion, nombre_institucion, debitos, creditos
+								FROM totales_institucion_financiera
+								WHERE institucion = ?`, id).WithContext(context.TODO()).Consistency(gocql.One).Scan(&total.InstitutionID, &total.InstitutionName, &debitsDec, &creditsDec)
+	if err != nil {
+		log.Println(err.Error())
+		return nil, err
+	}
+	total.Debits = debitsDec.String()
+	total.Credits = creditsDec.String()
+	return &total, nil
 }
 
 

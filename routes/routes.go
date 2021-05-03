@@ -32,4 +32,7 @@ func (h *HandlersRoutes) RoutesUp(app fiber.Router) {
 	//Routes operations
 	routesOperation := app.Group("/operations")
 	routesOperation.Post("/", h.CreateOperation)
+	routesOperation.Get("/account_holder/:id", h.GetAllOperationsByAccountHolderID)
+	routesOperation.Get("/institution_totals/:id", h.GetTotalsByInstitutionID)
+	routesOperation.Get("/account_holder/:id/month/:month", h.GetAllOperationsByAccountHolderIDAndMonth)
 }
