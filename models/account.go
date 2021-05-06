@@ -30,10 +30,12 @@ func (m *ManageAccount) GetAllByAccountHolder(id string) ([]Account, error) {
 	accounts := make([]Account, 0)
 	for scanner.Next() {
 		var account Account
-		if err := scanner.Scan(&account.AccountHolderID, &account.InstitutionID, &account.AccountNumber, &account.InstitutionName, &account.Type, &account.Balance, &account.AssociatedAccounts); err != nil {
+		var balanceDec inf.Dec
+		if err := scanner.Scan(&account.AccountHolderID, &account.InstitutionID, &account.AccountNumber, &account.InstitutionName, &account.Type, &balanceDec, &account.AssociatedAccounts); err != nil {
 			log.Println(err.Error())
 			return nil, err
 		}
+		account.Balance = balanceDec.String()
 		accounts = append(accounts, account)
 	}
 	return accounts, nil
